@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speaker View</title>
+  <link rel="stylesheet" href="vendor/github-dark.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="speaker.css" />
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+</head>
+<body class="speaker-body">
+  <div class="speaker-shell">
+    <header class="speaker-header">
+      <div>
+        <div class="speaker-kicker">SPEAKER VIEW</div>
+        <h1 class="speaker-title">Control de presentación</h1>
+      </div>
+      <div class="speaker-stats">
+        <div class="speaker-stat">
+          <span class="speaker-stat-label">Slide</span>
+          <span id="speaker-meta">Sin slides cargadas</span>
+        </div>
+        <div class="speaker-stat">
+          <span class="speaker-stat-label">Tiempo</span>
+          <span id="speaker-elapsed">00:00</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="speaker-grid">
+      <section class="speaker-panel speaker-panel-current">
+        <div class="speaker-panel-header">Actual</div>
+        <div id="speaker-current-slide" class="speaker-slide-panel"></div>
+      </section>
+
+      <section class="speaker-panel speaker-panel-next">
+        <div class="speaker-panel-header">Siguiente</div>
+        <div id="speaker-next-slide" class="speaker-slide-panel speaker-slide-panel-next"></div>
+      </section>
+
+      <section class="speaker-panel speaker-panel-notes">
+        <div class="speaker-panel-header">Notas actuales</div>
+        <div id="speaker-current-notes" class="speaker-notes-content">Esperando sincronización…</div>
+      </section>
+
+      <section class="speaker-panel speaker-panel-notes">
+        <div class="speaker-panel-header">Notas siguientes</div>
+        <div id="speaker-next-notes" class="speaker-notes-content">Esperando sincronización…</div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

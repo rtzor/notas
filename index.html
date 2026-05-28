@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notas</title>
+  <link rel="stylesheet" href="vendor/github-dark.min.css?v=1" />
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/highlight.min.js"></script>
+  <link rel="stylesheet" href="style.css?v=6" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-a"></div>
+  <div class="bg-orb bg-orb-b"></div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+  <div id="app">
+    <div id="stage">
+      <div id="slide-frame">
+        <div id="slide-content"></div>
+      </div>
+    </div>
+    <div id="controls">
+      <button id="btn-prev" aria-label="Slide anterior">←</button>
+      <span id="counter"></span>
+      <button id="btn-next" aria-label="Slide siguiente">→</button>
+      <button id="btn-speaker" aria-label="Abrir vista del presentador">Speaker</button>
+      <span id="keyboard-hint">click / espacio avanza &nbsp;·&nbsp; ← → navegar &nbsp;·&nbsp; P notas &nbsp;·&nbsp; F pantalla completa &nbsp;·&nbsp; S speaker</span>
+    </div>
+  </div>
+  <div id="notes-panel">
+    <div id="notes-label">NOTAS DEL PRESENTADOR</div>
+    <div id="notes-content"></div>
+  </div>
+  <script src="app.js?v=6" defer></script>
+</body>
+</html>

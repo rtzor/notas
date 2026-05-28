@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Slides Editor</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #111827; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+    .slide-enter { animation: fadeIn 0.2s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .markdown-preview h1 { font-size: 2rem; font-weight: 800; margin: 1rem 0; }
+    .markdown-preview h2 { font-size: 1.5rem; font-weight: 700; margin: 0.75rem 0; }
+    .markdown-preview h3 { font-size: 1.25rem; font-weight: 600; margin: 0.5rem 0; }
+
+    .markdown-preview p { color: #d1d5db; margin-bottom: 1rem; line-height: 1.6; }
+
+    .markdown-preview ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .markdown-preview ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+
+    .markdown-preview blockquote {
+      border-left: 4px solid #6366f1;
+      padding-left: 1rem;
+      color: #9ca3af;
+      margin: 1rem 0;
+    }
+
+    .markdown-preview code {
+      background: #1f2937;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+
+    .markdown-preview pre {
+      background: #111827;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+
+    .markdown-preview a {
+      color: #818cf8;
+      text-decoration: underline;
+    }
+
+    .markdown-preview hr {
+      border-color: #374151;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-950 text-white h-screen overflow-hidden">
+
+<div class="flex flex-col lg:flex-row h-full">
+
+  <!-- LEFT -->
+  <div class="w-full lg:w-1/2 flex flex-col border-r border-gray-800">
+
+    <div class="p-4 border-b border-gray-800 bg-gray-900">
+      <h1 class="font-bold text-lg">Markdown Editor</h1>
+      <p class="text-sm text-gray-400">Usa --- para crear slides</p>
+    </div>
+
+    <textarea
+      id="input"
+      class="flex-1 bg-gray-950 p-4 font-mono text-sm outline-none resize-none"
+      placeholder="# Escribe Markdown aquí..."
+    ></textarea>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="w-full lg:w-1/2 flex flex-col">
+
+    <div class="p-4 border-b border-gray-800 bg-gray-900 flex justify-between">
+      <div>
+        <h2 class="font-semibold">Preview</h2>
+        <p id="info" class="text-sm text-gray-400">Sin contenido</p>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="prev" class="px-3 py-1 bg-gray-800 rounded">←</button>
+        <button id="next" class="px-3 py-1 bg-indigo-600 rounded">→</button>
+      </div>
+    </div>
+
+    <div class="p-6 overflow-auto flex-1">
+      <div id="preview" class="markdown-preview max-w-3xl mx-auto text-white">
+        Empieza a escribir para ver la magia...
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const input = document.getElementById("input");
+const preview = document.getElementById("preview");
+const info = document.getElementById("info");
+const prev = document.getElementById("prev");
+const next = document.getElementById("next");
+
+let slides = [];
+let index = 0;
+let timeout;
+
+/* -------- SECURITY -------- */
+function sanitize(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/* -------- MARKDOWN -------- */
+function parse(md) {
+  let html = sanitize(md);
+
+  html = html.replace(/```([\s\S]*?)```/g,
+    (_, c) => `<pre><code>${c.trim()}</code></pre>`);
+
+  html = html.replace(/^# (.*)$/gm, "<h1>$1</h1>");
+  html = html.replace(/^## (.*)$/gm, "<h2>$1</h2>");
+  html = html.replace(/^### (.*)$/gm, "<h3>$1</h3>");
+
+  html = html.replace(/^> (.*)$/gm, "<blockquote>$1</blockquote>");
+
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  html = html.replace(/\[(.*?)\]\((.*?)\)/g,
+    '<a href="$2" target="_blank">$1</a>');
+
+  /* lists safe */
+  html = html.replace(/(?:^- .+(?:\n|$))+/gm, m =>
+    `<ul>${m.trim().split("\n").map(i => `<li>${i.slice(2)}</li>`).join("")}</ul>`
+  );
+
+  html = html.replace(/(?:^\d+\. .+(?:\n|$))+/gm, m =>
+    `<ol>${m.trim().split("\n").map(i => `<li>${i.replace(/^\d+\. /, "")}</li>`).join("")}</ol>`
+  );
+
+  html = html.split(/\n{2,}/).map(b => {
+    const t = b.trim();
+    if (!t) return "";
+    if (t.startsWith("<h") || t.startsWith("<ul") || t.startsWith("<ol") || t.startsWith("<pre") || t.startsWith("<blockquote")) {
+      return t;
+    }
+    return `<p>${t.replace(/\n/g, "<br>")}</p>`;
+  }).join("");
+
+  return html;
+}
+
+/* -------- SLIDES -------- */
+function splitSlides(text) {
+  return text.split(/^---$/gm)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+function render() {
+  const value = input.value;
+
+  if (!value.trim()) {
+    preview.innerHTML = "Empieza a escribir para ver la magia...";
+    info.textContent = "Sin contenido";
+    slides = [];
+    return;
+  }
+
+  slides = splitSlides(value);
+  if (!slides.length) return;
+
+  index = Math.min(index, slides.length - 1);
+
+  preview.classList.remove("slide-enter");
+  void preview.offsetWidth;
+  preview.classList.add("slide-enter");
+
+  preview.innerHTML = parse(slides[index]);
+
+  info.textContent = `Slide ${index + 1} / ${slides.length}`;
+
+  prev.disabled = index === 0;
+  next.disabled = index === slides.length - 1;
+}
+
+/* -------- EVENTS -------- */
+input.addEventListener("input", () => {
+  clearTimeout(timeout);
+  timeout = setTimeout(render, 10);
+});
+
+prev.onclick = () => { if (index > 0) index--; render(); };
+next.onclick = () => { if (index < slides.length - 1) index++; render(); };
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") prev.click();
+  if (e.key === "ArrowRight") next.click();
+});
+
+/* INIT */
+render();
+</script>
+
+</body>
+</html>
