@@ -17,13 +17,17 @@
 
 | Layout | Activación | Descripción |
 |--------|-----------|-------------|
-| `hero` | Automático (pocas líneas) | Texto grande centrado verticalmente |
+| `hero` | Automático (pocas líneas, sin código ni tabla) | Texto grande centrado verticalmente |
+| `title` | `<!-- layout: title -->` | Slide de portada/título |
 | `code` | Automático (hay `<pre>`) | Espaciado optimizado para bloques de código |
 | `table` | Automático (hay `<table>`) | Scroll horizontal, alineación superior |
 | `media` | Automático (hay `<img>`) | Márgenes y sombra para imágenes |
 | `embed` | Automático (hay embed) | Contenedor para iframe |
 | `two-columns` | `<!-- layout: two-columns -->` | Grid 50/50 con `<!-- column -->` |
-| `image-hero` | `<!-- image: hero -->` | Imagen a pantalla completa |
+| `split-code` | `<!-- layout: split-code -->` | Texto a la izquierda, bloque de código a la derecha |
+| `media-right` | `<!-- layout: media-right -->` | Imagen a la derecha, texto a la izquierda |
+| `media-left` | `<!-- layout: media-left -->` | Imagen a la izquierda, texto a la derecha |
+| `image-hero` | `<!-- image: hero -->` | Imagen de portada grande |
 | `embed-expanded` | `<!-- embed-expand-step: N -->` (al llegar al paso) | Iframe llena toda la slide, texto oculto |
 
 ---
@@ -54,8 +58,23 @@
 - `<!-- reveal -->` divide una slide en partes reveladas de una en una
 - Retroceder con `←` oculta el último fragmento revelado
 - El iframe embed puede ser un fragmento (`embed-step`)
-- Fragmento especial `embed-expand-step`: expande el iframe a pantalla completa
+- Fragmento especial `embed-expand-step`: expande el iframe a pantalla completa- `<!-- hide-from: N -->` oculta el bloque contenedor cuando el fragmento activo llega al índice N
 
+### Fondos de slide
+- `<!-- background: URL -->` establece una imagen de fondo con overlay oscuro semitransparente
+- `<!-- background: matrix -->` activa la animación de lluvia de caracteres estilo Matrix (canvas animado)
+- `<!-- bg-image: URL -->` combina imagen de fondo con matrix encima (canvas transparente sobre imagen oscurecida)
+- Sin directiva de fondo: efecto sutil de matrix con baja opacidad (decorativo)
+
+### Autoplay
+- `<!-- autoplay: N -->` avanza automáticamente a la siguiente slide tras N segundos
+- Muestra un indicador visual animado (barra de progreso inferior) durante la cuenta atrás
+- Se cancela si el usuario navega manualmente antes de que expire el timer
+
+### Callouts
+- Sintaxis compatible con GitHub Flavored Markdown: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!DANGER]`
+- Convertidos a `<div class="callout callout-{tipo}">` con icono emoji correspondiente
+- Iconos: ℹ️ NOTE, 💡 TIP, ⚠️ WARNING, ☠️ DANGER
 ### Notas del presentador
 - Panel deslizable en la parte inferior (`P` para toggle)
 - Bloques `> **Nota del presentador:**` se extraen del Markdown y no se muestran en la slide
@@ -71,6 +90,13 @@
 ### Responsive
 - Breakpoint mobile `≤700px`: altura de imágenes e iframes reducida
 - Breakpoint tablet `≤900px`: padding reducido, hint de teclado oculto, botones más compactos
+
+---
+
+### HTML inline
+- El Markdown se procesa con `marked.js` en modo permisivo: se admite HTML crudo directamente en los `.md`
+- Se pueden usar `<span>`, `<figure>`, clases CSS personalizadas, etc.
+- Sin sanitización: el contenido se asume de confianza (ver Limitaciones)
 
 ---
 

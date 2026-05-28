@@ -24,10 +24,35 @@ Se escriben como comentarios HTML `<!-- clave: valor -->` al principio del archi
 
 | Directiva | Efecto |
 |-----------|--------|
+| `<!-- layout: title -->` | Slide de portada/título (tipografía grande, centrada) |
 | `<!-- layout: two-columns -->` | Divide el contenido en dos columnas iguales usando `<!-- column -->` |
+| `<!-- layout: split-code -->` | Texto a la izquierda, bloque de código a la derecha |
 | `<!-- layout: media-right -->` | Imagen a la derecha, texto a la izquierda |
 | `<!-- layout: media-left -->` | Imagen a la izquierda, texto a la derecha |
 | `<!-- image: hero -->` | Imagen de portada grande (estilo hero) |
+
+### Fondo
+
+| Directiva | Tipo | Efecto |
+|-----------|------|--------|
+| `<!-- background: matrix -->` | keyword | Animación Matrix (lluvia de caracteres verdes sobre fondo oscuro) |
+| `<!-- background: URL -->` | string | Imagen de fondo con overlay oscuro semitransparente |
+| `<!-- bg-image: URL -->` | string | Imagen de fondo + animación matrix encima (canvas transparente) |
+
+**Ejemplo — slide de portada con matrix e imagen:**
+```markdown
+<!-- layout: title -->
+<!-- background: matrix -->
+<!-- bg-image: pres.png -->
+
+# Título de la presentación
+```
+
+### Autoplay
+
+| Directiva | Tipo | Efecto |
+|-----------|------|--------|
+| `<!-- autoplay: 5 -->` | número (segundos) | Avanza automáticamente a la siguiente slide tras N segundos |
 
 ### Embed (iframe interactivo)
 
@@ -72,6 +97,21 @@ Este párrafo aparece al primer avance.
 Este aparece al segundo avance.
 ```
 
+### `<!-- hide-from: N -->` — ocultar contenido desde un fragmento
+
+Oculta el bloque que contiene la directiva cuando el fragmento activo alcanza el índice N. Útil para reemplazar texto por un embed al avanzar.
+
+```markdown
+## Título visible siempre
+
+<!-- hide-from: 1 -->
+- Ítem visible solo antes del primer avance
+- Desaparece cuando aparece el embed
+
+<!-- embed: demo.html -->
+<!-- embed-step: 1 -->
+```
+
 ### `<!-- column -->` — layout de dos columnas
 
 Requiere `<!-- layout: two-columns -->` en las directivas. Divide el contenido en columnas.
@@ -87,6 +127,40 @@ Texto de la columna izquierda.
 
 Texto de la columna derecha.
 ```
+
+---
+
+## Callouts
+
+Sintaxis compatible con GitHub Flavored Markdown. Se renderizan como cajas destacadas con icono.
+
+```markdown
+> [!NOTE]
+> Información útil pero no crítica.
+
+> [!TIP]
+> Consejo práctico para el audiencia.
+
+> [!WARNING]
+> Aviso importante; puede causar problemas.
+
+> [!DANGER]
+> Acción destructiva o riesgo severo.
+```
+
+Iconos asignados: ℹ️ NOTE · 💡 TIP · ⚠️ WARNING · ☠️ DANGER
+
+---
+
+## HTML inline
+
+El Markdown admite HTML crudo. Se puede usar para estilos puntuales no disponibles en Markdown puro:
+
+```markdown
+# <span class="glow-green">Texto con glow verde</span>
+```
+
+El HTML no se sanitiza; usar solo con contenido propio de confianza.
 
 ---
 

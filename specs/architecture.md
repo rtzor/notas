@@ -17,12 +17,15 @@ Cada entrada de `slidesMeta[i]` tiene esta forma:
 
 ```js
 {
-  layout: null | 'two-columns' | 'media-right' | 'media-left',
+  layout: null | 'title' | 'two-columns' | 'split-code' | 'media-right' | 'media-left',
   image: null | 'hero',
-  embed: null | string,       // URL del iframe
-  embedHeight: null | number, // px
-  embedStep: null | number,   // índice de fragmento en que aparece
-  embedExpandStep: null | number  // índice en que ocupa toda la slide
+  embed: null | string,         // URL del iframe
+  embedHeight: null | number,   // px
+  embedStep: null | number,     // índice de fragmento en que aparece
+  embedExpandStep: null | number, // índice en que ocupa toda la slide
+  autoplay: null | number,      // segundos para auto-avanzar
+  background: null | string,    // 'matrix' o URL de imagen
+  bgImage: null | string        // URL de imagen de fondo (con matrix encima)
 }
 ```
 
@@ -49,7 +52,9 @@ Cada llamada a `renderSlide(index)` ejecuta este flujo dentro de un `setTimeout(
 ```
 renderMarkdown(markdown, meta)
   ├─ buildRevealHtml()    divide por <!-- reveal -->, crea .slide-fragment
-  ├─ buildColumnsHtml()   divide por <!-- column -->, crea .slide-columns
+  │    └─ renderContentHtml()
+  │         ├─ buildColumnsHtml()   (si layout=two-columns) divide por <!-- column -->
+  │         └─ processCallouts()   convierte > [!TYPE] → <div class="callout callout-type">
   └─ buildEmbedHtml()     crea <section class="slide-embed-frame"> con iframe
 
 container.innerHTML = html
@@ -57,11 +62,17 @@ container.innerHTML = html
 hljs.highlightElement()  por cada <pre><code>
 addCopyButtons()         inyecta <button class="copy-btn"> en cada <pre>
 
+stopMatrixBackground()   detiene canvas anterior si existe
+fondo de slide:          aplica bg-image CSS o inicia startMatrixBackground()
+
 applySlideLayout()       detecta contenido → añade clase de layout al contenedor
 enhanceSlideImages()     envuelve <img> en <figure>, añade <figcaption>
 applyFragmentState()     muestra/oculta fragmentos; aplica embed-expanded si procede
+  └─ hide-from:          oculta elementos [data-hide-from] cuando fragmentIndex >= N
 updateControls()         actualiza botones prev/next y contador
 broadcastState()         envía estado a Speaker View
+
+autoplay:                si meta.autoplay, programa setTimeout + indicador visual
 ```
 
 El token `renderToken` evita que renders obsoletos (slide cambiada antes de que expire el timeout) sobreescriban el resultado correcto.
@@ -74,6 +85,20 @@ Los fragmentos son elementos con `data-fragment-index="N"` en el DOM:
 - Generados por `<!-- reveal -->` → `<div class="slide-fragment" data-fragment-index="N">`
 - El embed puede ser un fragmento si tiene `embed-step`
 - `embed-expand-step` añade un paso adicional que no corresponde a ningún elemento DOM, por lo que `applyFragmentState` extiende `currentFragmentTotal` manualmente
+- `<!-- hide-from: N -->` → `<div data-hide-from="N">` en el DOM; se oculta cuando `currentFragmentIndex >= N`
+
+## Sistema de fondos animados (Matrix)
+
+`startMatrixBackground(opts)` crea un `<canvas>` absoluto dentro de `#slide-frame` y lo anima con `requestAnimationFrame`. Hay dos modos según `fadeAlpha`:
+
+| Modo | Condición | Descripción |
+|------|-----------|-------------|
+| **Clásico** | `fadeAlpha > 0` | Overlay oscuro entre frames crea efecto de trail; usado cuando `background: matrix` sin imagen |
+| **Sutil** | `fadeAlpha === 0` | Canvas transparente con trail explícito en arrays por columna; usado en modo combinado o decorativo |
+
+`stopMatrixBackground()` cancela el `requestAnimationFrame` activo y elimina el canvas del DOM. Se llama antes de cada render para evitar acumulación de canvases.
+
+`ResizeObserver` observa `#slide-frame` para redimensionar el canvas cuando cambia el tamaño de la ventana.
 
 Transiciones de estado por clic / tecla:
 

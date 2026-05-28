@@ -29,6 +29,8 @@ vendor/
 - `History API` (`replaceState`) — navegación sin recarga por hash `#N`
 - `Clipboard API` (`navigator.clipboard.writeText`) — botón copiar código
 - `Fullscreen API` — tecla `F`
+- `Canvas API` (2D context) — animación de fondo Matrix (`startMatrixBackground`)
+- `ResizeObserver` — redimensionado del canvas Matrix al cambiar el tamaño de ventana
 
 ## Estructura de archivos
 
@@ -36,14 +38,18 @@ vendor/
 mis_notas_3/
 ├── index.html          Vista principal de presentación
 ├── speaker.html        Vista del presentador (ventana emergente)
-├── app.js              Toda la lógica (~850 líneas)
-├── style.css           Estilos de index.html (~820 líneas)
+├── app.js              Toda la lógica (~1000 líneas)
+├── style.css           Estilos de index.html
 ├── speaker.css         Estilos de speaker.html
-├── vendor/             Dependencias locales
+├── vendor/             Dependencias locales (sin CDN, funciona offline)
 ├── 1.md … N.md         Slides de contenido (carga secuencial automática)
-├── v1.html, v2.html    Demos embebibles
+├── v1.html             Demo embebible — versión 1
+├── v2.html             Demo embebible — versión 2 (usada en slides de ejemplo)
+├── originals/          Imágenes originales sin optimizar
 └── specs/              Este directorio
 ```
+
+> Los archivos `index.html`, `style.css` y `app.js` usan query strings de cache-busting (`?v=N`) para forzar recarga tras actualizaciones.
 
 ## Cómo ejecutar
 
