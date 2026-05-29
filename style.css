@@ -751,3 +751,34 @@ button:disabled {
     display: none;
   }
 }
+
+/* ── Modo pantalla completa ─────────────────────────────── */
+:fullscreen #app,
+:-webkit-full-screen #app {
+  padding: 0;
+}
+
+:fullscreen #slide-frame,
+:-webkit-full-screen #slide-frame {
+  width: 100%;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+}
+
+:fullscreen #slide-frame::before,
+:-webkit-full-screen #slide-frame::before {
+  display: none;
+}
+
+:fullscreen #slide-content,
+:-webkit-full-screen #slide-content {
+  padding: 3rem clamp(2rem, 5vw, 6rem);
+}
+
+:fullscreen #controls,
+:-webkit-full-screen #controls {
+  display: none;
+}
